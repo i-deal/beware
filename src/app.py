@@ -18,7 +18,7 @@ classifier_model = load_model()
 
 app = FastAPI()
 
-@app.post("/generate")
+@app.post("/stream_to")
 async def generate_response(
     prompt: str = Form(...),
     images: list[UploadFile] = File(None)
