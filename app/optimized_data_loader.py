@@ -19,6 +19,7 @@ from concurrent.futures import ThreadPoolExecutor
 import pickle
 import time
 from functools import lru_cache
+from random import randint
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -237,7 +238,7 @@ class OptimizedDCSASSVideoDataset(Dataset):
             return np.array([])
         
         # Calculate frame indices for 15 frames
-        target_frames = 15
+        target_frames = randint(15,150)
         if total_frames <= target_frames:
             # If video is shorter, read all frames
             frame_indices = list(range(total_frames))
@@ -302,13 +303,13 @@ class OptimizedDCSASSVideoDataset(Dataset):
         video_tensor = torch.stack(frame_tensors)
         
         # Ensure exactly 15 frames
-        if video_tensor.shape[0] < 15:
+        if video_tensor.shape[0] < 12:
             # Pad with last frame
             padding = video_tensor[-1:].repeat(15 - video_tensor.shape[0], 1, 1, 1)
             video_tensor = torch.cat([video_tensor, padding], dim=0)
-        elif video_tensor.shape[0] > 15:
+        elif video_tensor.shape[0] > 150:
             # Truncate to 15 frames
-            video_tensor = video_tensor[:15]
+            video_tensor = video_tensor[:150]
         
         return video_tensor, self.remap_label(sample['label'])
 

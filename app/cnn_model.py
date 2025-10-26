@@ -1,9 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from app.optimized_data_loader import OptimizedDCSASSDataLoader as DCSASSDataLoader
 import wandb
-from pathlib import Path
 from tqdm import tqdm
 import os
 from datetime import datetime
@@ -116,7 +114,7 @@ class ViolenceCNN(nn.Module):
         x = x.item()
         return x > 0.5
 
-    def train_ep(self, dataloader, optimizer):
+    def train_ep(self, dataloader, optimizer, device='cpu'):
         self.train()
         total_loss = 0
         correct = 0
@@ -146,7 +144,7 @@ class ViolenceCNN(nn.Module):
         avg_loss = total_loss / len(dataloader)
         return avg_loss, accuracy
     
-    def test(self, dataloader):
+    def test(self, dataloader, device='cpu'):
         self.eval()
         total_loss = 0
         correct = 0
@@ -196,21 +194,3 @@ class ViolenceCNN(nn.Module):
             checkpoint =  {'state_dict': self.state_dict()}
             if epoch % 4 == 0:
                 torch.save(checkpoint, f'checkpoints/{checkpoint_folder}/checkpoint.pth')
-
-
-if __name__ == "__main__":
-    # train the model
-    model = ViolenceCNN(2)
-    device = 'cpu'
-    if not os.path.exists('checkpoints/run1/'):
-        os.mkdir('checkpoints/run1/')
-    #checkpoint = torch.load(f'checkpoints/run1/checkpoint.pth', device, weights_only = True)
-    #model.load_state_dict(checkpoint['state_dict'])
-    print('load data')
-    repo_root = Path(__file__).parent.parent  # backend/
-    data_root = repo_root / "data" / "DCSASS Dataset"
-    dataloader = DCSASSDataLoader()
-    train_loader = dataloader.train_loader
-    test_loader = dataloader.test_loader
-    print('start train')
-    model.train_full(train_loader, test_loader, device, 'run1')
