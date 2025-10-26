@@ -1,4 +1,6 @@
-# Watchout ML
+<div align="center">
+    <img src="https://raw.githubusercontent.com/spineda1208/watchout/main/.github/images/logo.png" width="100rem" height="100rem"/>
+</div>
 
 A machine learning service for violence and crime detection in images and video frames. This FastAPI-based service uses a custom CNN model to classify images for potential criminal activity and integrates with Google's Gemini AI for detailed analysis.
 
