@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.optim as optim
 from app.optimized_data_loader import OptimizedDCSASSDataLoader as DCSASSDataLoader
 import wandb
-from app.wandb_setup import initialize_wandb
 from pathlib import Path
 from tqdm import tqdm
 import os
@@ -181,7 +180,7 @@ class ViolenceCNN(nn.Module):
         scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
         initialize_wandb('crime-detect', {'version':'CNN-RECURSIVE'})
 
-        for epoch in range(0,100):
+        for epoch in range(0,400):
             train_loss, acc = self.train_ep(train_dataloader, optimizer)
             test_loss, test_acc = self.test(test_dataloader)
 
