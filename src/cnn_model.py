@@ -191,7 +191,7 @@ if __name__ == "__main__":
     device = 'cpu'
     if not os.path.exists('checkpoints/run1/'):
         os.mkdir('checkpoints/run1/')
-    #checkpoint = torch.load(f'checkpoints/run1/mVAE_checkpoint.pth', device, weights_only = True)
+    #checkpoint = torch.load(f'checkpoints/run1/checkpoint.pth', device, weights_only = True)
     #model.load_state_dict(checkpoint['state_dict'])
     print('load data')
     repo_root = Path(__file__).parent.parent  # backend/
