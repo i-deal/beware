@@ -1,22 +1,39 @@
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, File, UploadFile, Form
+from fastapi.responses import JSONResponse
+import google.generativeai as genai
+import os
+from io import BytesIO
+from PIL import Image
+from dotenv import load_dotenv
+from cnn_model import load_model
+from model_utils import stream_to_tensor, gemini_query
+load_dotenv()
 
+# gemini
+genai.configure(api_key=os.environ["GEMINI_KEY"])
+model = genai.GenerativeModel("gemini-2.5-pro")
 
-app = FastAPI(
-    title="Vercel + FastAPI",
-    description="Vercel + FastAPI",
-    version="1.0.0",
-)
+# real-time classifier:
+classifier_model = load_model()
 
+app = FastAPI()
 
-@app.get("/api/data")
-def get_sample_data():
-    return {
-        "data": [
-            {"id": 1, "name": "Sample Item 1", "value": 100},
-            {"id": 2, "name": "Sample Item 2", "value": 200},
-            {"id": 3, "name": "Sample Item 3", "value": 300}
-        ],
-        "total": 3,
-        "timestamp": "2024-01-01T00:00:00Z"
-    }
+@app.post("/generate")
+async def generate_response(
+    prompt: str = Form(...),
+    images: list[UploadFile] = File(None)
+):
+    inputs = [prompt]
+
+    # Convert uploaded images into Pillow Image objects
+    if images:
+        for img in images:
+            image_data = await img.read()
+            pil_img = Image.open(BytesIO(image_data))
+            inputs.append(pil_img)
+
+    try:
+        response = model.generate_content(inputs)
+        return JSONResponse({"response": response.text})
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)

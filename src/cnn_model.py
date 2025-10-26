@@ -1,10 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-#from dcsass_data_loader import DCSASSDataLoader
 from optimized_data_loader import OptimizedDCSASSDataLoader as DCSASSDataLoader
 import wandb
-from wandb_setup import initialize_wandb, log_system_metrics
+from wandb_setup import initialize_wandb
 from pathlib import Path
 from tqdm import tqdm
 import os
@@ -28,6 +27,13 @@ crime_to_label = {
             'Stealing': 11,
             'Vandalism': 12
         }
+
+def load_model():
+    model = ViolenceCNN(num_classes=2)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    checkpoint = torch.load(f'checkpoints/run1/checkpoint.pth', device, weights_only = True)
+    model.load_state_dict(checkpoint['state_dict'])
+    return model
 
 class ViolenceCNN(nn.Module):
     
