@@ -34,6 +34,9 @@ log.info(f"ML classifier model loaded in {load_time:.2f} seconds")
 app = FastAPI()
 log.info("FastAPI app ready")
 
+@app.get("/health", response_class=JSONResponse, tags=["System"])
+def health_check():
+    return {"status": "ok", "message": "Service is healthy and operational"}
 
 @app.post("/stream_to")
 async def generate_response(

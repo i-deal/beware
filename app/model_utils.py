@@ -15,16 +15,6 @@ transform = transforms.Compose(
 
 
 def stream_to_tensor(img_bytes: bytes, num_frames: int = 15) -> torch.Tensor:
-    """
-    Convert image bytes to a tensor batch suitable for the ViolenceCNN model.
-
-    Args:
-        img_bytes: Raw image bytes (JPEG/PNG)
-        num_frames: Number of frames to create (model expects 15 frames)
-
-    Returns:
-        Tensor of shape [num_frames, 3, 224, 224]
-    """
     # Open image from bytes
     img = Image.open(BytesIO(img_bytes)).convert("RGB")
 
@@ -49,7 +39,7 @@ def gemini_query(client, images: list) -> str:
         contents.append(types.Part.from_image(img))
     
     response = client.models.generate_content(
-        model="gemini-2.0-flash-exp",
+        model="gemini-2.5-flash",
         contents=contents
     )
     return response.text
