@@ -7,6 +7,7 @@ import wandb
 from wandb_setup import initialize_wandb, log_system_metrics
 from pathlib import Path
 from tqdm import tqdm
+import os
 
 
 labels = {'Assault':0, 'Robbery':1, 'Shoplifting':2, 'Shooting':3, 'Normal':4}
@@ -188,6 +189,8 @@ if __name__ == "__main__":
     # train the model
     model = ViolenceCNN(2)
     device = 'cpu'
+    if not os.path.exists('checkpoints/run1/'):
+        os.mkdir('checkpoints/run1/')
     #checkpoint = torch.load(f'checkpoints/run1/mVAE_checkpoint.pth', device, weights_only = True)
     #model.load_state_dict(checkpoint['state_dict'])
     print('load data')
