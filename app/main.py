@@ -5,19 +5,28 @@ import os
 from io import BytesIO
 from PIL import Image
 from dotenv import load_dotenv
-from cnn_model import load_model
-from model_utils import stream_to_tensor, gemini_query
+import time
+from app.logger import logger
+
+logger.info("Starting FastAPI application...")
 
 load_dotenv()
 
-# gemini
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 model = genai.GenerativeModel("gemini-2.5-pro")
 
-# real-time classifier:
+logger.info("Loading ML classifier model...")
+start_time = time.time()
+
+from app.cnn_model import load_model
+from app.model_utils import stream_to_tensor, gemini_query
+
 classifier_model = load_model()
+load_time = time.time() - start_time
+logger.info(f"ML classifier model loaded in {load_time:.2f} seconds")
 
 app = FastAPI()
+logger.info("FastAPI app ready")
 
 
 @app.post("/stream_to")

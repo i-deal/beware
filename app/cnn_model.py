@@ -1,12 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from optimized_data_loader import OptimizedDCSASSDataLoader as DCSASSDataLoader
-import wandb
-from wandb_setup import initialize_wandb
 from pathlib import Path
 from tqdm import tqdm
 import os
+from app.logger import logger
 
 
 labels = {'Assault':0, 'Robbery':1, 'Shoplifting':2, 'Shooting':3, 'Normal':4}
@@ -29,10 +27,29 @@ crime_to_label = {
         }
 
 def load_model():
+    logger.info("Initializing ViolenceCNN model...")
     model = ViolenceCNN(num_classes=2)
+    
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    checkpoint = torch.load(f'checkpoints/run1/checkpoint.pth', device, weights_only = True)
+    logger.info(f"Using device: {device}")
+    
+    checkpoint_path = os.path.join(os.path.dirname(__file__), 'checkpoints', 'run1', 'checkpoint.pth')
+    logger.info(f"Loading checkpoint from: {checkpoint_path}")
+    
+    if not os.path.exists(checkpoint_path):
+        logger.error(f"Checkpoint file not found at: {checkpoint_path}")
+        raise FileNotFoundError(f"Checkpoint not found: {checkpoint_path}")
+    
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=True)
+    logger.info("Checkpoint loaded from disk")
+    
     model.load_state_dict(checkpoint['state_dict'])
+    logger.info("Model weights loaded")
+    
+    model.to(device)
+    model.eval()
+    logger.info(f"Model moved to {device} and set to eval mode")
+    
     return model
 
 class ViolenceCNN(nn.Module):
