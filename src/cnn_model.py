@@ -182,7 +182,7 @@ class ViolenceCNN(nn.Module):
 
             checkpoint =  {'state_dict': self.state_dict()}
             if epoch % 4 == 0:
-                torch.save(checkpoint, f'checkpoints/{checkpoint_folder}/mVAE_checkpoint.pth')
+                torch.save(checkpoint, f'checkpoints/{checkpoint_folder}/checkpoint.pth')
 
 
 if __name__ == "__main__":
