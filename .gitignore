@@ -1,0 +1,196 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Project specific
+backend/cache/
+data/logs/
+*.log
+*.pkl
+*.h5
+*.hdf5
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Model files (too large for git)
+models/*.pth
+models/*.pt
+models/*.ckpt
+models/*.safetensors
+checkpoints/
+saved_models/
+
+# Data files (too large for git)
+data/*.mp4
+data/*.avi
+data/*.mov
+data/*.mkv
+data/*.wmv
+data/*.flv
+data/*.webm
+data/*.m4v
+data/*.3gp
+data/*.3g2
+data/*.asf
+data/*.rm
+data/*.rmvb
+data/*.vob
+data/*.ogv
+data/*.drc
+data/*.gif
+data/*.gifv
+data/*.mng
+data/*.avi
+data/*.mov
+data/*.qt
+data/*.wmv
+data/*.yuv
+data/*.rm
+data/*.rmvb
+data/*.asf
+data/*.amv
+data/*.m4p
+data/*.m4v
+data/*.mpg
+data/*.mp2
+data/*.mpeg
+data/*.mpe
+data/*.mpv
+data/*.mpg
+data/*.mpeg
+data/*.m2v
+data/*.m4v
+data/*.svi
+data/*.3gp
+data/*.3g2
+data/*.mxf
+data/*.roq
+data/*.nsv
+data/*.flv
+data/*.f4v
+data/*.f4p
+data/*.f4a
+data/*.f4b
+.venv/
+backend/data/
+wandb/
+backend/__pycache__/
+src/cache/
+src/data/
+src/wandb/
+src/__pycache__/
