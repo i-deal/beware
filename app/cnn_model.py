@@ -1,9 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import wandb
 from tqdm import tqdm
-import os
 from datetime import datetime
 
 labels = {"Assault": 0, "Robbery": 1, "Shoplifting": 2, "Shooting": 3, "Normal": 4}
@@ -44,6 +42,7 @@ def load_model():
 
 def initialize_wandb(project_name, config):
     """Initialize a WandB run with custom monitoring"""
+    import wandb
     wandb.init(
         project=project_name,
         config=config,
@@ -181,6 +180,7 @@ class ViolenceCNN(nn.Module):
 
     def train_full(self, train_dataloader, test_dataloader, device, checkpoint_folder):
         self.to(device)
+        import wandb
         optimizer = optim.Adam(self.parameters(), lr=0.001)
         scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
         initialize_wandb("crime-detect", {"version": "CNN-RECURSIVE"})
