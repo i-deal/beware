@@ -1,6 +1,7 @@
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import JSONResponse
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import os
 from io import BytesIO
 from PIL import Image
@@ -13,8 +14,7 @@ log.info("Starting FastAPI application...")
 
 load_dotenv()
 
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-model = genai.GenerativeModel("gemini-2.5-pro")
+client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 log.info("Loading ML classifier model...")
 start_time = time.time()
@@ -34,17 +34,19 @@ log.info("FastAPI app ready")
 async def generate_response(
     prompt: str = Form(...), images: list[UploadFile] = File(None)
 ):
-    inputs = [prompt]
-
-    # Convert uploaded images into Pillow Image objects
-    if images:
-        for img in images:
-            image_data = await img.read()
-            pil_img = Image.open(BytesIO(image_data))
-            inputs.append(pil_img)
-
     try:
-        response = model.generate_content(inputs)
+        # Convert PIL images to Part objects for the new API
+        contents = [prompt]
+        if images:
+            for img in images:
+                image_data = await img.read()
+                pil_img = Image.open(BytesIO(image_data))
+                contents.append(types.Part.from_image(pil_img))
+        
+        response = client.models.generate_content(
+            model="gemini-2.0-flash-exp",
+            contents=contents
+        )
         return JSONResponse({"response": response.text})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)

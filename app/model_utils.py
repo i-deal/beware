@@ -38,8 +38,18 @@ def stream_to_tensor(img_bytes: bytes, num_frames: int = 15) -> torch.Tensor:
     return batch_tensor
 
 
-def gemini_query(model, images: list) -> str:
+def gemini_query(client, images: list) -> str:
+    from google.genai import types
+    
     prompt = "This is a set of frames from CCTV footage that was flagged for potential criminal activity, quickly analyze if there are any crimes being committed in the footage, then respond with one of the following outputs (ignore the <>): <No criminal activity detected>, <Robbery detected>, <Violence detected>, <Shoplifting detected>, <Drug abuse detected>, <Arson detected>"
-    inputs = [prompt] + images
-    response = model.generate_content(inputs)
+    
+    # Convert PIL images to Part objects
+    contents = [prompt]
+    for img in images:
+        contents.append(types.Part.from_image(img))
+    
+    response = client.models.generate_content(
+        model="gemini-2.0-flash-exp",
+        contents=contents
+    )
     return response.text
