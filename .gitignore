@@ -197,3 +197,4 @@ src/__pycache__/
 !src/checkpoints/
 !src/checkpoints/run1/
 !src/checkpoints/run1/checkpoint.pth
+.vercel
