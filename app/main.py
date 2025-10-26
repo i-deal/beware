@@ -1,3 +1,8 @@
+import warnings
+
+# Suppress Pydantic warnings from google-genai package
+warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
+
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import JSONResponse
 from google import genai
