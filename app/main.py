@@ -6,6 +6,7 @@ from io import BytesIO
 from PIL import Image
 from dotenv import load_dotenv
 import time
+import torch
 from app.logger import logger
 
 logger.info("Starting FastAPI application...")
@@ -47,3 +48,59 @@ async def generate_response(
         return JSONResponse({"response": response.text})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
+
+
+@app.post("/classify")
+async def classify_image(image: UploadFile = File(...)):
+    """
+    Mock endpoint that accepts a JPEG/PNG image and runs inference with the CNN model.
+    
+    Args:
+        image: Image file (JPEG/PNG)
+    
+    Returns:
+        JSON response with classification result and confidence
+    """
+    try:
+        logger.info(f"Received image for classification: {image.filename}")
+        start_time = time.time()
+        
+        # Read image bytes
+        image_data = await image.read()
+        logger.info(f"Image size: {len(image_data)} bytes")
+        
+        # Convert to tensor batch
+        tensor_batch = stream_to_tensor(image_data, num_frames=15)
+        logger.info(f"Tensor batch shape: {tensor_batch.shape}")
+        
+        # Move to same device as model
+        device = next(classifier_model.parameters()).device
+        tensor_batch = tensor_batch.to(device)
+        
+        # Run inference
+        with torch.no_grad():
+            output = classifier_model(tensor_batch)
+            probabilities = torch.softmax(output, dim=1)
+            predicted_class = torch.argmax(probabilities, dim=1).item()
+            confidence = probabilities[0][predicted_class].item()
+        
+        inference_time = time.time() - start_time
+        logger.info(f"Inference completed in {inference_time:.3f} seconds")
+        
+        # Class 1 = Violence/Crime, Class 0 = Normal
+        illicit = predicted_class == 1
+        
+        return JSONResponse({
+            "illicit": illicit,
+            "image_info": {
+                "filename": image.filename,
+                "size_bytes": len(image_data)
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Error during classification: {str(e)}")
+        return JSONResponse(
+            {"success": False, "error": str(e)}, 
+            status_code=500
+        )
