@@ -25,7 +25,7 @@ log.info("Loading ML classifier model...")
 start_time = time.time()
 
 from app.cnn_model import load_model
-from app.model_utils import stream_to_tensor, gemini_query
+from app.model_utils import gemini_query, transform, post_to_email_server
 
 classifier_model = load_model()
 load_time = time.time() - start_time
@@ -39,24 +39,54 @@ def health_check():
     return {"status": "ok", "message": "Service is healthy and operational"}
 
 @app.post("/stream_to")
-async def generate_response(
-    prompt: str = Form(...), images: list[UploadFile] = File(None)
-):
+async def generate_response(images: list[UploadFile] = File(...)):
+    """
+    Endpoint that accepts a sequence of video frames, classifies them as a batch for illicit activity,
+    and if detected, analyzes them with Gemini for detailed description.
+    """
     try:
-        # Convert PIL images to Part objects for the new API
-        contents = [prompt]
-        if images:
-            for img in images:
-                image_data = await img.read()
-                pil_img = Image.open(BytesIO(image_data))
-                contents.append(types.Part.from_image(pil_img))
+        log.info(f"Received {len(images)} frames for processing")
+        device = next(classifier_model.parameters()).device
         
-        response = client.models.generate_content(
-            model="gemini-2.0-flash-exp",
-            contents=contents
-        )
-        return JSONResponse({"response": response.text})
+        pil_images = []
+        frame_tensors = []
+        
+        # process all images into tensors
+        for img in images:
+            image_data = await img.read()
+            pil_img = Image.open(BytesIO(image_data)).convert("RGB") 
+            
+            pil_images.append(pil_img)
+            
+            img_tensor = transform(pil_img)
+            frame_tensors.append(img_tensor)
+            
+        tensor_batch = torch.stack(frame_tensors)
+        tensor_batch = tensor_batch.to(device)
+            
+        with torch.no_grad():
+            output = classifier_model(tensor_batch)
+            probabilities = torch.softmax(output, dim=1)
+            predicted_class = torch.argmax(probabilities, dim=1).item()
+            confidence = probabilities[0][predicted_class].item()
+            
+        if predicted_class == 0:
+            gemini_result = gemini_query(client, pil_images)
+            post_to_email_server(gemini_result)
+            return JSONResponse({
+                "illicit_detected": True,
+                "confidence": confidence,
+                "analysis": gemini_result
+            })
+        else:
+            return JSONResponse({
+                "illicit_detected": False,
+                "confidence": confidence,
+                "analysis": "No criminal activity detected"
+            })
+            
     except Exception as e:
+        log.error(f"Error during processing: {str(e)}")
         return JSONResponse({"error": str(e)}, status_code=500)
 
 

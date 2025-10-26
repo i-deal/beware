@@ -11,7 +11,7 @@ RUN apt-get update && \
     # 2. Install torch and torchvision together for version compatibility
     pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu && \
     # 3. Install remaining dependencies
-    pip install --no-cache-dir fastapi[standard] numpy pillow google-genai python-dotenv tqdm && \
+    pip install --no-cache-dir fastapi[standard] numpy pillow google-genai python-dotenv tqdm requests && \
     # 4. Clean up the build tools
     apt-get purge -y gcc libjpeg-dev libpng-dev && \
     apt-get autoremove -y && \
