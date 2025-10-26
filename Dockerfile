@@ -1,28 +1,30 @@
 FROM python:3.13-slim-bookworm AS builder
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/
-
-RUN apt-get update && apt-get install -y gcc libgl1-mesa-glx libglib2.0-0 && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /src
 
-COPY pyproject.toml uv.lock* ./
+COPY pyproject.toml ./
 
-# Install the application dependencies.
-RUN uv sync --frozen --no-cache
+# Install only runtime dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc && \
+    pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --no-cache-dir fastapi[standard] numpy pillow google-genai python-dotenv torchvision tqdm && \
+    apt-get purge -y gcc && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy application contents after so dependencies cache is not invalidated
-
-# Final image not containing gcc and other build deps
+# Final stage
 FROM python:3.13-slim-bookworm
 
-RUN apt-get update && apt-get install -y --no-install-recommends libgl1-mesa-glx libglib2.0-0 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx \
+    libglib2.0-0 && \
+    rm -rf /var/lib/apt/lists/*
 
-WORKDIR /src
+WORKDIR /app
 
-COPY --from=builder /src/.venv ./.venv
+COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
 COPY ./app ./app
 
-ENV PATH="/src/.venv/bin:$PATH"
-
-CMD ["fastapi", "run", "app/main.py", "--port", "80", "--host", "0.0.0.0"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
